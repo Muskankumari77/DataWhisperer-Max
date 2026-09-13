@@ -2,10 +2,14 @@ from __future__ import annotations
 
 import os
 import re
-
+import streamlit as st
 from openai import OpenAI
 
-
+def _secret(name: str, default: str = "") -> str:
+    try:
+        return st.secrets.get(name, default)
+    except Exception:
+        return default
 # ============================================================
 # CODE GENERATION PROMPT
 # ============================================================
@@ -74,53 +78,37 @@ Rules:
 # ============================================================
 # CLIENT
 # ============================================================
-
 def _client(provider: str):
-
     if provider == "groq":
-
-        key = os.getenv("GROQ_API_KEY", "")
-
+        key = os.getenv("GROQ_API_KEY") or _secret("GROQ_API_KEY")
         if not key:
-            raise RuntimeError(
-                "GROQ_API_KEY is missing in .env"
-            )
+            raise RuntimeError("GROQ_API_KEY is missing")
 
         return OpenAI(
             api_key=key,
             base_url="https://api.groq.com/openai/v1",
         )
 
-    key = os.getenv("OPENAI_API_KEY", "")
-
+    key = os.getenv("OPENAI_API_KEY") or _secret("OPENAI_API_KEY")
     if not key:
-        raise RuntimeError(
-            "OPENAI_API_KEY is missing in .env"
-        )
+        raise RuntimeError("OPENAI_API_KEY is missing")
 
-    return OpenAI(
-        api_key=key,
-    )
-
+    return OpenAI(api_key=key)
 
 # ============================================================
 # MODEL
 # ============================================================
-
 def _model(provider: str) -> str:
-
     if provider == "groq":
-
-        return os.getenv(
+        return os.getenv("GROQ_MODEL") or _secret(
             "GROQ_MODEL",
-            "openai/gpt-oss-120b",
+            "openai/gpt-oss-120b"
         )
 
-    return os.getenv(
+    return os.getenv("OPENAI_MODEL") or _secret(
         "OPENAI_MODEL",
-        "gpt-4o-mini",
+        "gpt-4o-mini"
     )
-
 
 # ============================================================
 # CLEAN GENERATED CODE
