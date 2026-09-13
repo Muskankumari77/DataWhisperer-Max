@@ -525,9 +525,9 @@ with left:
     )
 
     st.dataframe(
-        df.head(10),
+        df,
         width="stretch",
-        height=250,
+        height=300,
         hide_index=True,
     )
 
